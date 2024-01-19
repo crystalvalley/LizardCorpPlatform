@@ -1,0 +1,10 @@
+
+.vs/
+
+LizardCorpBot/obj/
+
+LizardCorpBot.Data/obj/
+
+LizardCorpBot.Data/appsettings.json
+
+LizardCorpBot/appsettings.json
