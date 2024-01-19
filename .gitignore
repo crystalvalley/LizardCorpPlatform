@@ -8,3 +8,7 @@ LizardCorpBot.Data/obj/
 LizardCorpBot.Data/appsettings.json
 
 LizardCorpBot/appsettings.json
+
+LizardCorpBot/bin/
+
+LizardCorpBot.Data/bin/
