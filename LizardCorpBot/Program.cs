@@ -5,6 +5,7 @@ using Discord.Addons.Hosting;
 using Discord.WebSocket;
 using LizardCorpBot.Data;
 using LizardCorpBot.Data.DataAccess;
+using LizardCorpBot.Services.Minecraft;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,7 +23,7 @@ builder.Services.AddDiscordHost((config, _) =>
         GatewayIntents = GatewayIntents.All,
     };
 
-    config.Token = builder.Configuration["Token"] !;
+    config.Token = builder.Configuration["Token"]!;
 });
 
 builder.Services.AddCommandService((config, _) =>
@@ -36,6 +37,8 @@ builder.Services.AddInteractionService((config, _) =>
     config.LogLevel = LogSeverity.Debug;
     config.UseCompiledLambda = true;
 });
+
+builder.Services.AddHostedService<MinecraftWatcher>();
 
 builder.Services.AddDbContextFactory<LizardBotDbContext>(options =>
 {
