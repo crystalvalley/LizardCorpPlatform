@@ -3,6 +3,7 @@ using System;
 using LizardCorpBot.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace LizardCorpBot.Data.Migrations
 {
     [DbContext(typeof(LizardBotDbContext))]
-    partial class LizardBotDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240129104952_20240129")]
+    partial class _20240129
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -103,7 +106,7 @@ namespace LizardCorpBot.Data.Migrations
                         .HasColumnType("numeric(20,0)")
                         .HasColumnName("author");
 
-                    b.Property<DateTime?>("CompleteTime")
+                    b.Property<DateTime>("CompleteTime")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("complete_time");
 
@@ -127,10 +130,9 @@ namespace LizardCorpBot.Data.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("status");
 
-                    b.Property<decimal[]>("TaskHolder")
-                        .IsRequired()
-                        .HasColumnType("numeric(20,0)[]")
-                        .HasColumnName("taskholders");
+                    b.Property<decimal>("TaskHolder")
+                        .HasColumnType("numeric(20,0)")
+                        .HasColumnName("taskholder");
 
                     b.Property<DateTime?>("TimeLimit")
                         .HasColumnType("timestamp with time zone")

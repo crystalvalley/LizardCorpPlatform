@@ -21,5 +21,7 @@ namespace LizardCorpBot.Data
         public DbSet<MinecraftUser> MinecraftUsers { get; set; }
 
         public DbSet<Todo> Todos { get; set; }
+
+        public DbSet<TodoChannel> TodoChannels { get; set; }
     }
 }

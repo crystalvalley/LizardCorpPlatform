@@ -45,21 +45,21 @@ namespace LizardCorpBot.Data.Model
         [Column("title")]
         public required string Title { get; set; }
 
-        [Column("description")]
-
-        public required string Description { get; set; }
-
         [Column("author")]
         [Description("discord user id of author")]
         public required ulong Author { get; set; }
 
-        [Column("taskholder")]
+        [Column("taskholders")]
         [Description("discord user id of taskholder")]
-        public required ulong TaskHolder { get; set; }
+        public List<ulong> TaskHolder { get; set; } = [];
 
         [Column("guild_id")]
         [Description("discord id of guild where the todo was posted")]
         public required ulong Guild { get; set; }
+
+        [Column("message_id")]
+        [Description("discord id of guild where the todo was posted")]
+        public required ulong MessageId { get; set; }
 
         [Column("is_completed")]
         public bool IsCompleted { get; set; }
@@ -71,7 +71,7 @@ namespace LizardCorpBot.Data.Model
         public DateTime CreateTime { get; set; }
 
         [Column("complete_time")]
-        public DateTime CompleteTime { get; set; }
+        public DateTime? CompleteTime { get; set; }
 
         [Column("time_limit")]
         public DateTime? TimeLimit { get; set; }

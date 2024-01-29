@@ -3,6 +3,7 @@ using System;
 using LizardCorpBot.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace LizardCorpBot.Data.Migrations
 {
     [DbContext(typeof(LizardBotDbContext))]
-    partial class LizardBotDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240129130431_20240129_6")]
+    partial class _20240129_6
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
