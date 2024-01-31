@@ -45,8 +45,13 @@
 
             await Client.WaitForReadyAsync(stoppingToken);
 
-            if (_environment.IsDevelopment()) await _service.AddCommandsToGuildAsync(ulong.Parse(_configuration["DevelopingGuildId"] !));
+            await _service.RegisterCommandsToGuildAsync(ulong.Parse(_configuration["DevelopingGuildId"]!));
+            /*
+            if (_environment.IsDevelopment()) {
+                Console.WriteLine("!!");
+            }
             else await _service.AddCommandsGloballyAsync();
+            */
         }
 
         /// <summary>

@@ -3,6 +3,7 @@ using System;
 using LizardCorpBot.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace LizardCorpBot.Data.Migrations
 {
     [DbContext(typeof(LizardBotDbContext))]
-    partial class LizardBotDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240129130431_20240129_6")]
+    partial class _20240129_6
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -107,10 +110,6 @@ namespace LizardCorpBot.Data.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("complete_time");
 
-                    b.Property<decimal>("ConfirmerId")
-                        .HasColumnType("numeric(20,0)")
-                        .HasColumnName("confirmer");
-
                     b.Property<DateTime>("CreateTime")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("create_time");
@@ -118,6 +117,10 @@ namespace LizardCorpBot.Data.Migrations
                     b.Property<decimal>("Guild")
                         .HasColumnType("numeric(20,0)")
                         .HasColumnName("guild_id");
+
+                    b.Property<bool>("IsCompleted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_completed");
 
                     b.Property<decimal>("MessageId")
                         .HasColumnType("numeric(20,0)")

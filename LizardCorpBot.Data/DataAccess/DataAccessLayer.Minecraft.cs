@@ -32,6 +32,7 @@
             }
             else
             {
+                // 이거 안 되는 코드임. 수정해야함.
                 user.UserId = userid;
             }
 
