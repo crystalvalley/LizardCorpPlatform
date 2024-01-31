@@ -1,1 +1,1 @@
-# LizardCorpBot
+# LizardCorpPlatform
