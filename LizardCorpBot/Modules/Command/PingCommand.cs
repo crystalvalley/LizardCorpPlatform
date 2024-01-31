@@ -5,18 +5,20 @@
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
+    using Discord;
     using Discord.Commands;
+    using LizardCorpBot.Modules.Command.CustomContext;
 
     /// <summary>
     /// 테스트용 Ping커맨드.
     /// </summary>
-    public class PingCommand : ModuleBase<SocketCommandContext>
+    public class PingCommand : ModuleBase<BaseSocketCommandContext>
     {
         /// <summary>
         /// ping을 받으면 pong을 돌려줌.
         /// </summary>
         /// <returns>A <see cref="Task"/> 비동기 처리 결과 반환.</returns>
-        [Command("ping")]
+        [Command("base_ping")]
         public async Task Ping()
         {
             await ReplyAsync("pong");

@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
@@ -18,6 +19,7 @@
     public class TodoInteraction(DataAccessLayer accessLayer) : InteractionModuleBase<SocketInteractionContext>
     {
         private readonly DataAccessLayer _accessLayer = accessLayer;
+        private readonly Dictionary<ulong, ulong> cache = [];
 
         /// <summary>
         /// Todo채널 지정용 커맨드.
@@ -34,37 +36,36 @@
             await ReplyAsync("등록되었습니다.");
         }
 
+        /// <summary>
+        /// Todo등록하기.
+        /// </summary>
+        /// <param name="title">할일 제목.</param>
+        /// <param name="dateTime">마감.</param>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         [SlashCommand("set_todo", "todo등록")]
-        public async Task SetTodo(
-            [Summary("할일")] string title,
-            [Summary("언제까지")] string? dateTime = null)
+        public async Task SetTodo([Summary("할일")] string title)
         {
             var todoCh = await _accessLayer.GetTodoChannelAsync(Context.Guild.Id);
             if (todoCh == null) return;
             var ch = Context.Guild.GetTextChannel(todoCh.ChannelId);
             if (ch == null) return;
 
-            var embed = new EmbedBuilder
-            {
-                Title = title,
-            };
-            embed.AddField("작성자", Context.User.Mention, true);
-            embed.AddField("담당자", "미정", true);
-            embed.AddField("마감", dateTime ?? "미정", true);
-
-            var response = await ch.SendMessageAsync(embed: embed.Build());
-
             Todo todo = new()
             {
                 Author = Context.User.Id,
                 Guild = Context.Guild.Id,
-                MessageId = response.Id,
                 Title = title,
                 Status = TodoStatus.Posted,
                 CreateTime = DateTime.UtcNow,
             };
 
+            var embed = todo.GetTodoEmbed(Context.Guild);
+
+            var response = await ch.SendMessageAsync("신규투고", embed: embed.Build());
+            todo.MessageId = response.Id;
+
             await _accessLayer.AddTodoAsync(todo);
+
 
             await RespondAsync("등록되었습니다.");
         }

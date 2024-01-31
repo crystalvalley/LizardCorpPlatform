@@ -29,7 +29,7 @@
         /// </summary>
         /// <param name="messageId">메시지 ID.</param>
         /// <returns>A <see cref="Task{TResult}"/> 비동기 처리 결과로 Todo를 반환.</returns>
-        public async Task<Todo?> GetTodoFromMessageID(ulong messageId)
+        public async Task<Todo?> GetTodoFromMessageIDAsync(ulong messageId)
         {
             var context = await _contextFactory.CreateDbContextAsync();
             return context.Todos.Where(x => x.MessageId == messageId).FirstOrDefault();

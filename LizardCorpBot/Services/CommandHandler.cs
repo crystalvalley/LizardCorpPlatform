@@ -8,6 +8,7 @@
     using Discord.Addons.Hosting;
     using Discord.Commands;
     using Discord.WebSocket;
+    using LizardCorpBot.Modules.Command.CustomContext;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Logging;
 
@@ -22,10 +23,10 @@
     /// <param name="provider">The <see cref="IServiceProvider"/> that should be inject.</param>
     /// <param name="commandService">The <see cref="CommandService"/> that should be inject.</param>
     /// <param name="config">The <see cref="IConfiguration"/> that should be inject.</param>
-    public class CommandHandler(DiscordSocketClient client, ILogger<CommandHandler> logger, IServiceProvider provider, CommandService commandService, IConfiguration config) : DiscordClientService(client, logger)
+    public class CommandHandler(DiscordSocketClient client, ILogger<CommandHandler> logger, IServiceProvider provider, LizardCommandService commandService, IConfiguration config) : DiscordClientService(client, logger)
     {
         private readonly IServiceProvider _provider = provider;
-        private readonly CommandService _service = commandService;
+        private readonly LizardCommandService _service = commandService;
         private readonly IConfiguration _configuration = config;
 
         /// <summary>
@@ -83,8 +84,8 @@
                 return;
             }
 
-            var context = new SocketCommandContext(Client, message);
-            await _service.ExecuteAsync(context, argPos, _provider);
+            var context = new BaseSocketCommandContext(Client, message);
+            await _service.ExecuteCommandAsync(context, _provider, argPos);
         }
     }
 }

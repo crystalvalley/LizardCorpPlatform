@@ -2,6 +2,7 @@
 using System.Runtime.InteropServices;
 using Discord;
 using Discord.Addons.Hosting;
+using Discord.Commands;
 using Discord.WebSocket;
 using LizardCorpBot.Data;
 using LizardCorpBot.Data.DataAccess;
@@ -27,10 +28,22 @@ builder.Services.AddDiscordHost((config, _) =>
     config.Token = builder.Configuration["Token"]!;
 });
 
+/*
 builder.Services.AddCommandService((config, _) =>
 {
     config.DefaultRunMode = Discord.Commands.RunMode.Async;
     config.CaseSensitiveCommands = false;
+});
+*/
+
+builder.Services.AddSingleton<LizardCommandService>(x =>
+{
+    CommandServiceConfig config = new()
+    {
+        DefaultRunMode = RunMode.Async,
+        CaseSensitiveCommands = false,
+    };
+    return new LizardCommandService(config);
 });
 
 builder.Services.AddInteractionService((config, _) =>

@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Reflection;
     using System.Text;
     using System.Threading;
     using System.Threading.Channels;
@@ -13,6 +14,7 @@
     using Discord.WebSocket;
     using LizardCorpBot.Data.DataAccess;
     using LizardCorpBot.Data.Model;
+    using LizardCorpBot.Modules.Command.CustomContext;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Logging;
     using Npgsql.Replication.PgOutput.Messages;
@@ -28,106 +30,92 @@
     /// <param name="commandService">The <see cref="CommandService"/> that should be inject.</param>
     /// <param name="config">The <see cref="IConfiguration"/> that should be inject.</param>
     /// <param name="accessLayer">The <see cref="DataAccessLayer"/> that should be inject.</param>
-    public class TodoService(DataAccessLayer accessLayer, DiscordSocketClient client, ILogger<CommandHandler> logger, IConfiguration config) : DiscordClientService(client, logger)
+    public class TodoService(DataAccessLayer accessLayer, DiscordSocketClient client, LizardCommandService commandService, IServiceProvider provider, ILogger<CommandHandler> logger, IConfiguration config) : DiscordClientService(client, logger)
     {
         private readonly IConfiguration _configuration = config;
         private readonly DataAccessLayer _accessLayer = accessLayer;
+        private readonly LizardCommandService _service = commandService;
+        private readonly IServiceProvider _provider = provider;
 
         private readonly string[] _emojis = ["Mecha_OK_Mengdok_01", "Mecha_No_Mengdok_01", "Mecha_Z_Mengdok_01"];
 
         private readonly ulong channelId = 1197554245063417927;
 
         /// <inheritdoc/>
-        protected override Task ExecuteAsync(CancellationToken stoppingToken)
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             Client.MessageReceived += HandleMessage;
 
             // Client.MessageDeleted += HandleMessageDeleted;
             // Client.MessageUpdated += HandleMessageUpdate;
-
             Client.ReactionAdded += HandleReactionAdd;
             Client.ReactionRemoved += HandleReactionRemoved;
-            return Task.CompletedTask;
+
+            await _service.AddModulesAsync(Assembly.GetEntryAssembly(), _provider);
         }
 
         private async Task HandleReactionAdd(Cacheable<IUserMessage, ulong> cacheable1, Cacheable<IMessageChannel, ulong> cacheable2, SocketReaction reaction)
         {
             if (reaction.Channel.GetChannelType() != ChannelType.Text) return;
             if (reaction.UserId == ulong.Parse(_configuration["BotId"]!)) return;
-            Todo? todo = await _accessLayer.GetTodoFromMessageID(reaction.MessageId);
+            Todo? todo = await _accessLayer.GetTodoFromMessageIDAsync(reaction.MessageId);
             if (todo == null) return;
 
             // 자신의 일로 추가
             if (reaction.Emote.Name == "Mecha_Z_Mengdok_01")
             {
-                todo.TaskHolder.Add(reaction.UserId);
-                await _accessLayer.UpdateTodoAsync(todo);
-
-                var embed = new EmbedBuilder
+                todo.ToggleTaskHold(reaction.UserId);
+            }
+            else
+            {
+                // todo를 취소함, 작성자 또는 담당자가 취소/롤백 가능.
+                if (reaction.Emote.Name == "Mecha_No_Mengdok_01" && todo.IsComfirmer(reaction.UserId))
                 {
-                    Title = todo.Title,
-                };
-
-                var author = await reaction.Channel.GetUserAsync(todo.Author);
-
-                embed.AddField("작성자", author.Mention, true);
-                string holders = string.Empty;
-                foreach (var holder in todo.TaskHolder)
-                {
-                    holders += (await reaction.Channel.GetUserAsync(holder)).Mention + "\r\n";
+                    todo.ToggleCancel(reaction.UserId);
                 }
 
-                embed.AddField("담당자", holders == string.Empty ? "미정" : holders, true);
-                embed.AddField("마감", todo.TimeLimit == null ? "미정" : todo.TimeLimit, true);
-
-                await reaction.Channel.ModifyMessageAsync(reaction.MessageId, x =>
+                // todo를 완료함, 작성자 또는 담당자가 완료/롤백 가능.
+                if (reaction.Emote.Name == "Mecha_OK_Mengdok_01" && todo.IsComfirmer(reaction.UserId))
                 {
-                    x.Embed = embed.Build();
-                });
+                    todo.ToggleComplete(reaction.UserId);
+                }
             }
 
-            // todo를 취소함
-            if (reaction.Emote.Name == "Mecha_No_Mengdok_01") { }
+            await _accessLayer.UpdateTodoAsync(todo);
+            var embed = new EmbedBuilder
+            {
+                Title = todo.Title,
+            };
 
-            // todo를 완료함
-            if (reaction.Emote.Name == "Mecha_OK_Mengdok_01") { }
+            var author = await reaction.Channel.GetUserAsync(todo.Author);
+
+            embed.AddField("작성자", author.Mention, true);
+            string holders = string.Empty;
+            foreach (var holder in todo.TaskHolder)
+            {
+                holders += (await reaction.Channel.GetUserAsync(holder)).Mention + "\r\n";
+            }
+
+            embed.AddField("담당자", holders == string.Empty ? "미정" : holders, true);
+            embed.AddField("마감", todo.TimeLimit == null ? "미정" : todo.TimeLimit, true);
+            embed.WithFooter(todo.Status.GetValue());
+
+            await reaction.Channel.ModifyMessageAsync(reaction.MessageId, x =>
+            {
+                x.Embed = embed.Build();
+            });
+            var msg = await reaction.Channel.GetMessageAsync(reaction.MessageId);
+            await msg.RemoveReactionAsync(reaction.Emote, reaction.User.GetValueOrDefault());
         }
 
         private async Task HandleReactionRemoved(Cacheable<IUserMessage, ulong> cacheable1, Cacheable<IMessageChannel, ulong> cacheable2, SocketReaction reaction)
         {
-            if (reaction.Channel.GetChannelType() != ChannelType.Text) return;
-            if (reaction.UserId == ulong.Parse(_configuration["BotId"]!)) return;
-            Todo? todo = await _accessLayer.GetTodoFromMessageID(reaction.MessageId);
-            if (todo == null) return;
+            Console.WriteLine("dd");
+        }
 
-            // 자신의 일에서 제거
-            if (reaction.Emote.Name == "Mecha_Z_Mengdok_01")
-            {
-                todo.TaskHolder.Remove(reaction.UserId);
-                await _accessLayer.UpdateTodoAsync(todo);
-
-                var embed = new EmbedBuilder
-                {
-                    Title = todo.Title,
-                };
-
-                var author = await reaction.Channel.GetUserAsync(todo.Author);
-
-                embed.AddField("작성자", author.Mention, true);
-                string holders = string.Empty;
-                foreach (var holder in todo.TaskHolder)
-                {
-                    holders += (await reaction.Channel.GetUserAsync(holder)).Mention;
-                }
-
-                embed.AddField("담당자", holders == string.Empty ? "미정" : holders, true);
-                embed.AddField("마감", todo.TimeLimit == null ? "미정" : todo.TimeLimit, true);
-
-                await reaction.Channel.ModifyMessageAsync(reaction.MessageId, x =>
-                {
-                    x.Embed = embed.Build();
-                });
-            }
+        private EmbedBuilder GetEmbedBuilderFromTodo(Todo todo)
+        {
+            throw new NotImplementedException();
         }
 
         #region 나중에
@@ -169,8 +157,8 @@
             }
 
             await deletedChannel.Value.SendMessageAsync(embed: embed.Build());
-
         }
+
         #endregion
 
         /// <summary>
@@ -180,23 +168,37 @@
         /// <returns><see cref="Task"/> 비동기 처리 결과 반환.</returns>
         private async Task HandleMessage(SocketMessage incomingMessage)
         {
+
             if (incomingMessage is not SocketUserMessage msg) return;
             if (msg.Channel.Id == channelId && msg.Author.Id != ulong.Parse(_configuration["BotId"]!)) await msg.DeleteAsync();
             if (msg.Channel.Id == channelId && msg.Author.Id == ulong.Parse(_configuration["BotId"]!) &&
                 msg.Content == "등록되었습니다.") await msg.DeleteAsync();
 
-            // 초기 등록 todo의 경우 리액션 추가
-            var guild = Client.GetGuild(ulong.Parse(_configuration["DevelopingGuildId"]!));
-            List<IEmote> eList = new();
-            foreach (var e in _emojis)
+            // 답장으로 텍스트 커맨드 실행
+            if (msg.ReferencedMessage != null)
             {
-                IEmote emote = guild.Emotes.First(emote => emote.Name == e);
-                Console.WriteLine(emote.Name);
-                eList.Add(emote);
+                var context = new TodoSocketCommandContext(Client, msg);
+                await _service.ExecuteCommandAsync(context, _provider);
             }
 
-            await msg.AddReactionsAsync(eList);
-        }
+            // 초기 등록 todo의 경우 리액션 추가
+            if(msg.Content == "신규투고")
+            {
+                var guild = Client.GetGuild(ulong.Parse(_configuration["DevelopingGuildId"]!));
+                List<IEmote> eList = [];
+                foreach (var e in _emojis)
+                {
+                    IEmote emote = guild.Emotes.First(emote => emote.Name == e);
+                    eList.Add(emote);
+                }
 
+                await msg.ModifyAsync(m =>
+                {
+                    m.Content = string.Empty;
+                    m.Embed = msg.Embeds.FirstOrDefault();
+                });
+                await msg.AddReactionsAsync(eList);
+            }
+        }
     }
 }
