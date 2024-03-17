@@ -7,6 +7,7 @@ using Discord.WebSocket;
 using LizardCorpBot.Data;
 using LizardCorpBot.Data.DataAccess;
 using LizardCorpBot.Services;
+using LizardCorpBot.Services.Cloud;
 using LizardCorpBot.Services.Minecraft;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -56,6 +57,15 @@ builder.Services.AddHostedService<MinecraftWatcher>();
 builder.Services.AddHostedService<InteractionHandler>();
 builder.Services.AddHostedService<CommandHandler>();
 builder.Services.AddHostedService<TodoService>();
+
+builder.Services.AddSingleton<LizardCloudService>();
+
+/*
+builder.Services.AddMediatR(config =>
+{
+
+});
+*/
 
 builder.Services.AddDbContextFactory<LizardBotDbContext>(options =>
 {

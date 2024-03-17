@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "U6lmDFgB+2/JGRJ6PffsfIQh8bypTZ/Rj6KH7uOChHjbRMnnriHkFiZ0QKDpsRYwgJNg5jAynppn0Q9wGS/Dcg==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\hamke\\OneDrive\\Documents\\[Visual Studio]\\LizardCorpPlatform\\LizardCorpPlatform.Common\\LizardCorpPlatform.Common.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\hamke\\.nuget\\packages\\stylecop.analyzers\\1.1.118\\stylecop.analyzers.1.1.118.nupkg.sha512"
+  ],
+  "logs": []
+}

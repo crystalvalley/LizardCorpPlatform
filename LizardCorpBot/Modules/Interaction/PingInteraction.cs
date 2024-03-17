@@ -6,6 +6,7 @@
     using System.Text;
     using System.Threading.Tasks;
     using Discord.Interactions;
+    using LizardCorpBot.Services.Cloud;
 
     /// <summary>
     /// 테스트용 Ping슬래시 커맨드.

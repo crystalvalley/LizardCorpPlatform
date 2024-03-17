@@ -11,6 +11,7 @@
     using Discord.WebSocket;
     using LizardCorpBot.Data.DataAccess;
     using LizardCorpBot.Data.Model;
+    using LizardCorpBot.Services.Cloud;
 
     /// <summary>
     /// Todo용 커맨드.
@@ -65,7 +66,6 @@
             todo.MessageId = response.Id;
 
             await _accessLayer.AddTodoAsync(todo);
-
 
             await RespondAsync("등록되었습니다.");
         }

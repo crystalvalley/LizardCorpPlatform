@@ -2,6 +2,7 @@
 {
     using LizardCorpBot.Data.Model;
     using Microsoft.EntityFrameworkCore;
+    using System.Data.SqlTypes;
 
     /// <summary>
     /// partial클래스로 분할, 마인크래프트 관련 데이터 처리.
